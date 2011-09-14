@@ -247,6 +247,10 @@ wxSizer *PreferencesFilesTab( wxWindow *parent, bool call_fit = TRUE, bool set_s
 #define IDC_INCFILES 10169
 #define IDC_SELINCDIR 10170
 #define IDC_TEMPFILES 10171
+#ifdef ENABLE_TORRENT
+#define IDC_TORRENTFILES 10900
+#define IDC_TORRENTSTRATEGY 10901
+#endif
 #define IDC_SELTEMPDIR 10172
 #define IDC_SHARESELECTOR 10173
 #define IDC_SHAREHIDDENFILES 10174

@@ -77,6 +77,9 @@ CDebugCategory g_debugcats[] = {
 	CDebugCategory( logKadEntryTracking,	wxT("Kademlia Entry Tracking") ),
 	CDebugCategory( logEC,			wxT("External Connect") ),
 	CDebugCategory( logHTTP,		wxT("HTTP") )
+#ifdef ENABLE_TORRENT
+	,CDebugCategory( logTorrent,		wxT("Torrent") )
+#endif
 };
 
 

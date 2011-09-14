@@ -1057,7 +1057,9 @@ void CStatistics::UpdateStats(const CECPacket* stats)
 	s_statData[sdTotalSentBytes] = stats->GetTagByNameSafe(EC_TAG_STATS_TOTAL_SENT_BYTES)->GetInt();
 	s_statData[sdTotalReceivedBytes] = stats->GetTagByNameSafe(EC_TAG_STATS_TOTAL_RECEIVED_BYTES)->GetInt();
 	s_statData[sdSharedFileCount] = stats->GetTagByNameSafe(EC_TAG_STATS_SHARED_FILE_COUNT)->GetInt();
-
+#ifdef ENABLE_TORRENT
+	s_statData[sdMainlineConnected] = stats->GetTagByNameSafe(EC_TAG_STATS_MAINLINE_CONNECTED)->GetInt();
+#endif
 	const CECTag * LoggerTag = stats->GetTagByName(EC_TAG_STATS_LOGGER_MESSAGE);
 	if (LoggerTag) {
 		for (CECTag::const_iterator it = LoggerTag->begin(); it != LoggerTag->end(); it++) {

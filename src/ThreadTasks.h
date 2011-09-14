@@ -29,6 +29,9 @@
 
 #include "ThreadScheduler.h"
 #include <common/Path.h>
+#ifdef ENABLE_TORRENT
+#include "MD4Hash.h"
+#endif
 
 class CKnownFile;
 class CPartFile;
@@ -166,6 +169,9 @@ protected:
 	bool		m_error;
 	//! The resulting full path. File may be be renamed.
 	CPath		m_newName;
+#ifdef ENABLE_TORRENT
+	CMD4Hash    m_fileId;
+#endif
 };
 
 

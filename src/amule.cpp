@@ -24,7 +24,7 @@
 //
 
 
-#include "amule.h"			// Interface declarations.
+#include "amule.h"				// Interface declarations.
 
 #include <csignal>
 #include <cstring>
@@ -80,6 +80,9 @@
 #include "UploadBandwidthThrottler.h"
 #include "UserEvents.h"
 #include "ScopedPtr.h"
+#ifdef ENABLE_TORRENT
+#include "Torrent.h"
+#endif
 
 #ifdef ENABLE_UPNP
 #include "UPnPBase.h"			// Needed for UPnP
@@ -331,6 +334,10 @@ int CamuleApp::OnExit()
 	delete uploadBandwidthThrottler;
 	uploadBandwidthThrottler = NULL;
 
+#ifdef ENABLE_TORRENT
+	// Stop torrent session
+	torrent::CTorrent::GetInstance().EndTorrentSession();
+#endif
 	if (m_app_state!=APP_STATE_STARTING) {
 		AddLogLineNS(_("aMule shutdown completed."));
 	}
@@ -558,7 +565,15 @@ bool CamuleApp::OnInit()
 	if (thePrefs::GetNetworkED2K()) {
 		serverlist->Init();
 	}
+#ifdef ENABLE_TORRENT
+	// Initialiaze torrent session
+	torrent::CTorrent::GetInstance().StartTorrentSession();
+#endif
+	//Load Metfiles
 	downloadqueue->LoadMetFiles(thePrefs::GetTempDir());
+#ifdef ENABLE_TORRENT
+	torrent::CTorrent::GetInstance().LoadUnregisteredTorrents();
+#endif
 	sharedfiles->Reload();
 	
 	// Ensure that the up/down ratio is used
@@ -1174,6 +1189,9 @@ void CamuleApp::OnCoreTimer(CTimerEvent& WXUNUSED(evt))
 
 	uploadqueue->Process();
 	downloadqueue->Process();
+#ifdef ENABLE_TORRENT
+	torrent::CTorrent::GetInstance().Process();
+#endif
 	//theApp->clientcredits->Process();
 	theStats::CalculateRates();
 
@@ -1194,7 +1212,7 @@ void CamuleApp::OnCoreTimer(CTimerEvent& WXUNUSED(evt))
 		msPrev1 = msCur;
 		clientcredits->Process();
 		clientlist->Process();
-		
+
 		// Publish files to server if needed.
 		sharedfiles->Process();
 		
@@ -1681,6 +1699,13 @@ bool CamuleApp::IsKadRunningInLanMode() const
 {
 	return Kademlia::CKademlia::IsRunningInLANMode();
 }
+
+#ifdef ENABLE_TORRENT
+bool CamuleApp::IsMainlineConnected() const
+{
+	return torrent::CTorrent::GetInstance().IsMainlineConnected();
+}
+#endif
 
 // Kad stats
 uint32 CamuleApp::GetKadUsers() const

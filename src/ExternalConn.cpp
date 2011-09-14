@@ -56,6 +56,9 @@
 #include "kademlia/kademlia/Kademlia.h"
 #include "kademlia/kademlia/UDPFirewallTester.h"
 
+#ifdef ENABLE_TORRENT
+#include "Torrent.h"
+#endif
 
 //-------------------- File_Encoder --------------------
 
@@ -610,6 +613,10 @@ static CECPacket *Get_EC_Response_StatRequest(const CECPacket *request, CLoggerA
 				response->AddTag(CECTag(EC_TAG_STATS_BUDDY_IP, BuddyIP));
 				response->AddTag(CECTag(EC_TAG_STATS_BUDDY_PORT, BuddyPort));
 			}
+#ifdef ENABLE_TORRENT
+			// Mainline stats
+			response->AddTag(CECTag(EC_TAG_STATS_MAINLINE_CONNECTED,torrent::CTorrent::GetInstance().IsMainlineConnected()));
+#endif
 		case EC_DETAIL_UPDATE:
 			break;
 	};
@@ -1735,6 +1742,17 @@ CECPacket *CECServerSocket::ProcessRequest2(const CECPacket *request)
 			break;
 		}
 		
+#ifdef ENABLE_TORRENT
+		// Torrent
+		case EC_OP_MAINLINE_START:
+			torrent::CTorrent::GetInstance().StartMainline();
+			response = new CECPacket(EC_OP_NOOP);
+			break;
+		case EC_OP_MAINLINE_STOP:
+			torrent::CTorrent::GetInstance().StopMainline();
+			response = new CECPacket(EC_OP_NOOP);
+			break;
+#endif
 		//
 		// Kad
 		//

@@ -36,6 +36,9 @@
 #include "Preferences.h"		// Needed for thePrefs
 #include "ScopedPtr.h"			// Needed for CScopedPtr and CScopedArray
 #include "PlatformSpecific.h"		// Needed for CanFSHandleSpecialChars
+#ifdef ENABLE_TORRENT
+#include "Torrent.h"
+#endif
 
 #ifdef HAVE_CONFIG_H
 #	include "config.h"
@@ -144,7 +147,7 @@ void CHashingTask::Entry()
 			% m_filename).GetString());
 	}
 	
-	
+
 	// This loops creates the part-hashes, loop-de-loop.
 	try {
 		for (uint16 part = 0; part < knownfile->GetPartCount() && !TestDestroy(); part++) {
@@ -385,7 +388,18 @@ bool CAICHSyncTask::ConvertToKnown2ToKnown264()
 ////////////////////////////////////////////////////////////
 // CCompletionTask
 
-
+#ifdef ENABLE_TORRENT
+CCompletionTask::CCompletionTask(const CPartFile* file)
+	// GetPrintable is used to improve the readability of the log.
+	: CThreadTask(wxT("Completing"), file->GetFullName().GetPrintable(), ETP_High),
+	  m_filename(file->GetFileName()),
+	  m_metPath(file->GetFullName()),
+	  m_category(file->GetCategory()),
+	  m_owner(file),
+	  m_error(false),
+	  m_fileId(file->GetFileHash())
+{
+#else
 CCompletionTask::CCompletionTask(const CPartFile* file)
 	// GetPrintable is used to improve the readability of the log.
 	: CThreadTask(wxT("Completing"), file->GetFullName().GetPrintable(), ETP_High),
@@ -395,6 +409,7 @@ CCompletionTask::CCompletionTask(const CPartFile* file)
 	  m_owner(file),
 	  m_error(false)
 {
+#endif
 	wxASSERT(m_filename.IsOk());
 	wxASSERT(m_metPath.IsOk());
 	wxASSERT(m_owner);
@@ -455,6 +470,13 @@ void CCompletionTask::Entry()
 		}
 	}
 
+#ifdef ENABLE_TORRENT
+	// Create a torrent if this was not created earlier.
+	if(!torrent::CTorrent::GetInstance().HasBTMetadata(m_fileId)){
+		torrent::CTorrent::GetInstance().GiveUp(m_fileId);
+		torrent::CTorrent::GetInstance().CreateMetadataForFile(m_fileId, dstName, targetPath);
+	}
+#endif
 	// Removes the various other data-files	
 	const wxChar* otherMetExt[] = { wxT(""), PARTMET_BAK_EXT, wxT(".seeds"), NULL };
 	for (size_t i = 0; otherMetExt[i]; ++i) {

@@ -62,6 +62,12 @@
 
 #include <string>			// Do_not_auto_remove (mingw-gcc-3.4.5)
 
+#ifdef ENABLE_TORRENT
+#include <boost/algorithm/string.hpp>
+#include <boost/filesystem.hpp>
+#include "Torrent.h"
+#include <libtorrent/escape_string.hpp>
+#endif
 
 // Max. file IDs per UDP packet
 // ----------------------------
@@ -1395,6 +1401,12 @@ bool CDownloadQueue::AddLink( const wxString& link, uint8 category )
 {
 	wxString uri(link);
 
+#ifdef ENABLE_TORRENT
+	// If link has btih metadata format should be treated as BT magnet link.
+	if (link.StartsWith(wxT("magnet:?xt=urn:btih:"))){
+		return torrent::CTorrent::GetInstance().AddDownloadFromMagnet(std::string(link.ToAscii()));
+	}
+#endif
 	if (link.compare(0, 7, wxT("magnet:")) == 0) {
 		uri = CMagnetED2KConverter(link);
 		if (uri.empty()) {
@@ -1403,6 +1415,13 @@ bool CDownloadQueue::AddLink( const wxString& link, uint8 category )
 		}
 	}
 
+#ifdef ENABLE_TORRENT
+	// If link suffix is .torrent, it should be treated as a torrent info-file.
+	if (link.EndsWith(wxT(".torrent"))){
+		boost::filesystem::path p(link);
+		return torrent::CTorrent::GetInstance().AddDownloadUsingTorrentFile(p);
+	}
+#endif
 	if (uri.compare(0, 7, wxT("ed2k://")) == 0) {
 		return AddED2KLink(uri, category);
 	} else {
@@ -1410,7 +1429,6 @@ bool CDownloadQueue::AddLink( const wxString& link, uint8 category )
 		return false;
 	}
 }
-
 
 bool CDownloadQueue::AddED2KLink( const wxString& link, uint8 category )
 {

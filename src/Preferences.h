@@ -217,6 +217,12 @@ public:
 	static void		SetIncomingDir(const CPath& dir){ s_incomingdir = dir; }
 	static const CPath&	GetTempDir()			{ return s_tempdir; }
 	static void		SetTempDir(const CPath& dir)	{ s_tempdir = dir; }
+#ifdef ENABLE_TORRENT
+	static const CPath& GetTorrentDir()			{ return s_torrentdir; }
+	static void		SetTorrentDir(const CPath& dir)	{ s_torrentdir = dir; }
+	static const int	GetTorrentStrategy()		{ return s_torrentstrategy; }
+	static void		SetTorrentsTRATEGY(const int strategy)	{ s_torrentstrategy = strategy; }
+#endif
 	static const CMD4Hash&	GetUserHash()			{ return s_userhash; }
 	static void		SetUserHash(const CMD4Hash& h)	{ s_userhash = h; }
 	static uint16		GetMaxUpload()			{ return s_maxupload; }
@@ -630,6 +636,10 @@ protected:
 ////////////// FILES
 	static CPath	s_incomingdir;
 	static CPath	s_tempdir;
+#ifdef ENABLE_TORRENT
+	static CPath	s_torrentdir; 	 //! Directory where Torrent info-files will be persisted.
+	static int 		s_torrentstrategy; //! Strategy selected for Torrent connections.
+#endif
 	static bool	s_ICH;
 	static bool	s_AICHTrustEveryHash;
 

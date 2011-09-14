@@ -36,7 +36,9 @@
 #include "ScopedPtr.h"
 #include "SearchList.h"		// Needed for UpdateSearchFileByHash
 #include <common/Format.h>
-
+#ifdef ENABLE_TORRENT
+#include "Torrent.h"
+#endif
 
 // This function is inlined for performance
 inline bool CKnownFileList::KnownFileMatches(
@@ -154,6 +156,13 @@ void CKnownFileList::Save()
 			if (it->second->IsLargeFile()) {
 				bContainsAnyLargeFiles = true;
 			}
+#ifdef ENABLE_TORRENT
+			//create a torrent if it was not created earlier
+			if( it->second->IsCompleted() && !torrent::CTorrent::GetInstance().HasBTMetadata(it->first) ){
+				AddLogLineN(_("Creating torrent for: ") + (it->second->GetFilePath().GetPrintable()) + (it->second->GetFileName().GetPrintable()));
+				torrent::CTorrent::GetInstance().CreateMetadataForFile(it->first, it->second->GetFileName(), it->second->GetFilePath());
+			}
+#endif
 		}
 		
 		file.Seek(0);

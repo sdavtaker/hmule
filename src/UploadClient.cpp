@@ -46,6 +46,9 @@
 #include "GuiEvents.h"		// Needed for Notify_*
 #include "FileArea.h"		// Needed for CFileArea
 
+#ifdef ENABLE_TORRENT
+#include "Torrent.h"
+#endif
 
 //	members of CUpDownClient
 //	which are mainly used for uploading functions 
@@ -766,6 +769,24 @@ void CUpDownClient::SendCommentInfo(CKnownFile* file)
 	AddDebugLogLineN(logLocalClient, wxT("Local Client: OP_FILEDESC to ") + GetFullIP());
 	SendPacket(packet,true);
 }
+#ifdef ENABLE_TORRENT
+void CUpDownClient::SendBTIH(CKnownFile* file){
+	if (!ExtProtocolAvailable()) {
+		return;
+	}	
+	CMemFile data(256);
+	if(torrent::CTorrent::GetInstance().HasBTMetadata(file->GetFileHash())){
+		data.WriteHash(file->GetFileHash());
+		data.WriteUInt16(torrent::CTorrent::GetInstance().GetPort());
+		data.WriteString(torrent::CTorrent::GetInstance().GetBTIHAsString(file->GetFileHash()), GetUnicodeSupport(), 2);
+		
+	}
+	CPacket* packet = new CPacket(data, OP_EMULEPROT, OP_BTIH);
+	theStats::AddUpOverheadOther(packet->GetPacketSize());
+	AddDebugLogLineN(logTorrent, wxT("Local Client: OP_BTIH to ") + GetFullIP());
+	SendPacket(packet,true);
+}
+#endif
 
 void  CUpDownClient::UnBan(){
 	m_Aggressiveness = 0;

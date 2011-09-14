@@ -506,7 +506,9 @@ enum StatDataIndex {
 	sdTotalSentBytes,
 	sdTotalReceivedBytes,
 	sdSharedFileCount,
-
+#ifdef ENABLE_TORRENT
+	sdMainlineConnected,
+#endif
 	sdTotalItems
 };
 
@@ -555,7 +557,9 @@ private:
 	static	uint32	GetBuddyIP()			{ return s_statData[sdBuddyIP]; }
 	static	uint32	GetBuddyPort()			{ return s_statData[sdBuddyPort]; }
 	static	bool	IsKadRunningInLanMode()	{ return s_statData[sdKadInLanMode] != 0; }
-
+#ifdef ENABLE_TORRENT
+	static  bool 	IsMainlineConnected()	{ return s_statData[sdMainlineConnected] != 0; }
+#endif
 	static	void	UpdateStats(const CECPacket* stats);
 
 	void	UpdateStatsTree();

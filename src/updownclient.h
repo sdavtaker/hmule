@@ -218,6 +218,9 @@ public:
 	void		SendMuleInfoPacket(bool bAnswer, bool OSInfo = false);
 	bool		ProcessMuleInfoPacket(const byte* pachPacket, uint32 nSize);
 	void		ProcessMuleCommentPacket(const byte* pachPacket, uint32 nSize);
+#ifdef ENABLE_TORRENT
+	void 		ProcessBTIHPacket(const byte* pachPacket, uint32 nSize);
+#endif
 	bool		Compare(const CUpDownClient* tocomp, bool bIgnoreUserhash = false) const;
 	void		SetLastSrcReqTime()		{ m_dwLastSourceRequest = ::GetTickCount(); }
 	void		SetLastSrcAnswerTime()		{ m_dwLastSourceAnswer = ::GetTickCount(); }
@@ -298,7 +301,11 @@ public:
 	uint32		SendBlockData();
 	void		ClearUploadBlockRequests();
 	void		SendRankingInfo();
+	
 	void		SendCommentInfo(CKnownFile *file);
+#ifdef ENABLE_TORRENT
+	void 		SendBTIH(CKnownFile *file);
+#endif
 	bool 		IsDifferentPartBlock() const;
 	void		UnBan();
 	void		Ban();

@@ -52,8 +52,10 @@
 #include "IPFilter.h"		// Needed for CIPFilter
 #include "ListenSocket.h"	// Needed for CListenSocket
 #include "GuiEvents.h"		// Needed for Notify_*
-
-
+#ifdef ENABLE_TORRENT
+#include "Torrent.h" 		// Needed for BT sha1 exchange
+#include <boost/lexical_cast.hpp>
+#endif
 //#define __PACKET_RECV_DUMP__
 
 //------------------------------------------------------------------------------
@@ -484,6 +486,14 @@ bool CClientTCPSocket::ProcessPacket(const byte* buffer, uint32 size, uint8 opco
 					m_client->SendCommentInfo(reqfile);
 
 				break;
+#ifdef ENABLE_TORRENT
+				// SendPacket might kill the socket, so check
+				AddDebugLogLineN(logTorrent, "Trying to send Info hash");
+				if (m_client){
+					AddLogLineNS("Sending Info hash");
+					m_client->SendBTIH(reqfile);
+				}
+#endif
 			}
 			throw wxString(wxT("Invalid OP_REQUESTFILENAME packet size"));
 			break;  
@@ -1119,7 +1129,23 @@ bool CClientTCPSocket::ProcessExtPacket(const byte* buffer, uint32 size, uint8 o
 						
 						// Since it's for somebody else to see, we need to send the prettified
 						// filename, rather than the (possibly) mangled actual filename
+#ifdef ENABLE_TORRENT
+						data_out.WriteString(reqfile->GetFileName().GetPrintable(), m_client->GetUnicodeSupport()); //standard filename
+						//Sending OP_BTIH
+						AddDebugLogLineN(logTorrent, "Sending BTIH");
+						CMemFile data(256);
+						if(torrent::CTorrent::GetInstance().HasBTMetadata(reqfile->GetFileHash())){
+							data.WriteHash(reqfilehash);
+							data.WriteUInt16(torrent::CTorrent::GetInstance().GetPort());
+							data.WriteString(torrent::CTorrent::GetInstance().GetBTIHAsString(reqfile->GetFileHash()), m_client->GetUnicodeSupport(), 2);
+						}
+						CPacket* packet = new CPacket(data, OP_EMULEPROT, OP_BTIH);
+						theStats::AddUpOverheadOther(packet->GetPacketSize());
+						AddDebugLogLineN(logTorrent, wxT("Local Client: OP_BTIH to ") + m_client->GetFullIP());
+						SendPacket(packet,true);
+#else
 						data_out.WriteString(reqfile->GetFileName().GetPrintable(), m_client->GetUnicodeSupport());
+#endif
 						break;
 					}
 					case OP_AICHFILEHASHREQ: {
@@ -1559,7 +1585,12 @@ bool CClientTCPSocket::ProcessExtPacket(const byte* buffer, uint32 size, uint8 o
 			m_client->ProcessMuleCommentPacket(buffer, size);
 			break;
 		}
-
+#ifdef ENABLE_TORRENT
+		case OP_BTIH: {
+			m_client->ProcessBTIHPacket(buffer, size);
+		}
+		break;
+#endif
 		// Unsupported
 		case OP_REQUESTPREVIEW: {
 			AddDebugLogLineN( logRemoteClient, wxT("Remote Client: OP_REQUESTPREVIEW  from ") + m_client->GetFullIP()  );

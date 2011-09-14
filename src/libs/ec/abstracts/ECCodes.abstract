@@ -149,6 +149,10 @@ EC_OP_SERVER_SET_STATIC_PRIO        0x56
 
 EC_OP_FRIEND                        0x57
 
+EC_OP_MAINLINE_START                0x58
+
+EC_OP_MAINLINE_STOP                 0x59
+
 [/Section]
 
 [Section Content]
@@ -205,6 +209,7 @@ EC_TAG_STATS_UL_SPEED                     0x0200
 	EC_TAG_STATS_TOTAL_SENT_BYTES             0x0218
 	EC_TAG_STATS_TOTAL_RECEIVED_BYTES         0x0219
 	EC_TAG_STATS_SHARED_FILE_COUNT            0x021A
+	EC_TAG_STATS_MAINLINE_CONNECTED           0x021B
 
 EC_TAG_PARTFILE                           0x0300
 	EC_TAG_PARTFILE_NAME                      0x0301

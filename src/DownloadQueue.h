@@ -279,7 +279,6 @@ public:
 	bool	AddED2KLink( const CED2KServerLink* link );
 	bool	AddED2KLink( const CED2KServerListLink* link );
 
-
 	/**
 	 * Returns the current server which is beening queried by UDP packets.
 	 */

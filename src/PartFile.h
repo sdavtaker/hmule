@@ -385,7 +385,7 @@ public:
 	bool IsHashSetNeeded() const				{ return m_hashsetneeded; }
 	void SetHashSetNeeded(bool value)			{ m_hashsetneeded = value; }
 	
-	uint64  GetCompletedSize() const			{ return completedsize; }
+	uint64  GetCompletedSize() const;
 	void	SetCompletedSize(uint64 size)		{ completedsize = size; }	
 
 	bool IsLocalSrcRequestQueued() const		{ return m_localSrcReqQueued; }

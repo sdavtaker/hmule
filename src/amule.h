@@ -208,6 +208,10 @@ public:
 	bool IsFirewalledKadUDP() const;
 	// Check Kad state (LAN mode)
 	bool IsKadRunningInLanMode() const;
+#ifdef ENABLE_TORRENT
+	// Check if Mainline DHT is connected
+	bool IsMainlineConnected() const;
+#endif
 	// Kad stats
 	uint32	GetKadUsers() const;
 	uint32	GetKadFiles() const;

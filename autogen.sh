@@ -60,6 +60,12 @@ datarootdir = @datarootdir@' intl/Makefile.in > intl/Makefile.in.tmp && mv -f in
 #   cp -f configure.in~ configure.in
 #fi
 
+#be sure the aux dir is created
+mkdir -p build-aux
+
+echo "Running libtoolize"
+libtoolize || glibtoolize
+
 echo "Running aclocal -I m4"
 aclocal -I m4
 

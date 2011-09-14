@@ -82,7 +82,10 @@
 #include "kademlia/kademlia/Search.h"
 #include "kademlia/kademlia/UDPFirewallTester.h"
 #include "kademlia/routing/RoutingZone.h"
-
+#ifdef ENABLE_TORRENT
+#include "Torrent.h"
+#include <boost/lexical_cast.hpp>
+#endif
 
 //#define __PACKET_DEBUG__
 
@@ -1217,6 +1220,20 @@ void CUpDownClient::ProcessMuleCommentPacket(const byte* pachPacket, uint32 nSiz
 	// Update file rating
 	m_reqfile->UpdateFileRatingCommentAvail();
 }
+#ifdef ENABLE_TORRENT
+void CUpDownClient::ProcessBTIHPacket(const byte* pachPacket, uint32 nSize){
+	if (!m_reqfile) {
+		AddLogLineCS("Received BTIH for unknown file");
+		throw CInvalidPacket(wxT("Received BTIH for unknown file"));	
+	}
+	const CMemFile data(pachPacket, nSize);
+	CMD4Hash reqfilehash = data.ReadHash();
+	uint16 port = data.ReadUInt16();
+	wxString str;
+	str = data.ReadString((GetUnicodeSupport() != utf8strNone), 2 /* bytes (it's a uint32)*/, true);
+	torrent::CTorrent::GetInstance().AddDownloadUsingSHA1AndPeer(reqfilehash, std::string(str.ToAscii()), std::string(GetFullIP()), (int) port);
+}
+#endif
 
 
 void CUpDownClient::ClearDownloadBlockRequests()

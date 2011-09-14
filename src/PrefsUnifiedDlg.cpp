@@ -625,12 +625,22 @@ void PrefsUnifiedDlg::OnOk(wxCommandEvent& WXUNUSED(event))
 		restart_needed_msg += _("- Temp folder changed.\n");
 	}
 
+#ifdef ENABLE_TORRENT
+	if (CfgChanged(IDC_TORRENTFILES)) {
+			restart_needed = true;
+			restart_needed_msg += _("- Torrent folder changed.\n");
+	}
+#endif
 	if (CfgChanged(IDC_NETWORKED2K) && thePrefs::GetNetworkED2K()) {
 		restart_needed = true;
 		restart_needed_msg += _("- ED2K network enabled.\n");
 	}
 
+#ifdef ENABLE_TORRENT
+	if (CfgChanged(IDC_INCFILES) || CfgChanged(IDC_TEMPFILES) || CfgChanged(IDC_TORRENTFILES) || m_ShareSelector->HasChanged ) {
+#else
 	if (CfgChanged(IDC_INCFILES) || CfgChanged(IDC_TEMPFILES) || m_ShareSelector->HasChanged ) {
+#endif
 		theApp->sharedfiles->Reload();
 	}
 

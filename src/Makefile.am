@@ -78,7 +78,7 @@ libmuleappcommon_a_SOURCES = \
 	TerminationProcess.cpp \
 	Timer.cpp
 
-libmuleappcommon_a_CPPFLAGS = $(AM_CPPFLAGS) $(WXBASE_CPPFLAGS) -I$(srcdir)/libs -I$(srcdir)/include $(CRYPTOPP_CPPFLAGS) $(LIBUPNP_CPPFLAGS)
+libmuleappcommon_a_CPPFLAGS = $(AM_CPPFLAGS) $(WXBASE_CPPFLAGS) $(BOOST_CPPFLAGS) -I$(srcdir)/libs -I$(srcdir)/include $(CRYPTOPP_CPPFLAGS) $(LIBUPNP_CPPFLAGS)
 
 
 # Common to core/monolithic
@@ -103,7 +103,7 @@ libmuleappcore_a_SOURCES = \
 	kademlia/routing/RoutingBin.cpp \
 	kademlia/utils/UInt128.cpp
 
-libmuleappcore_a_CPPFLAGS = $(AM_CPPFLAGS) $(WXBASE_CPPFLAGS) -I$(srcdir)/libs -I$(srcdir)/include $(CRYPTOPP_CPPFLAGS) $(LIBUPNP_CPPFLAGS)
+libmuleappcore_a_CPPFLAGS = $(AM_CPPFLAGS) $(WXBASE_CPPFLAGS) $(BOOST_CPPFLAGS) -I$(srcdir)/libs -I$(srcdir)/include $(CRYPTOPP_CPPFLAGS) $(LIBUPNP_CPPFLAGS)
 
 
 # Common to gui/monolithic
@@ -167,7 +167,12 @@ core_sources = \
 	kademlia/net/PacketTracking.cpp \
 	kademlia/routing/Contact.cpp \
 	kademlia/routing/RoutingZone.cpp
-
+if TORRENT
+core_sources+= \
+	Torrent.cpp \
+	TorrentMuleMapping.cpp \
+	TorrentStrategy.cpp
+endif
 
 gui_sources = \
 	amule-gui.cpp \
@@ -220,10 +225,11 @@ common_sources = \
 
 # Libs
 
-core_libs = -L. -lmuleappcore $(LIBUPNP_LDFLAGS) $(LIBUPNP_LIBS)
+core_libs = -L. -lmuleappcore $(LIBUPNP_LDFLAGS) $(LIBUPNP_LIBS) $(BOOST_FILESYSTEM_LDFLAGS) $(BOOST_FILESYSTEM_LIBS)
 gui_libs = -L. -lmuleappgui $(WX_LIBS) $(GEOIP_LDFLAGS) $(GEOIP_LIBS)
 remote_common_libs = -Llibs/common -Llibs/ec/cpp -lmulecommon -lec $(BFD_LIBS) $(ZLIB_LDFLAGS) $(ZLIB_LIBS) $(RESOLV_LIB)
-common_libs = -L. -lmuleappcommon $(remote_common_libs) $(CRYPTOPP_LDFLAGS) $(CRYPTOPP_LIBS)
+common_libs = -L. -lmuleappcommon $(remote_common_libs) $(CRYPTOPP_LDFLAGS) $(CRYPTOPP_LIBS) $(BOOST_FILESYSTEM_LDFLAGS) $(BOOST_FILESYSTEM_LIBS)
+
 
 core_deps = libmuleappcore.a
 gui_deps = libmuleappgui.a
@@ -237,7 +243,7 @@ endif
 #
 # Flags
 #
-core_flags = $(LIBUPNP_CPPFLAGS) $(LIBUPNP_CFLAGS)
+core_flags = $(LIBUPNP_CPPFLAGS) $(LIBUPNP_CFLAGS) $(BOOST_CPPFLAGS)
 gui_flags = $(WX_CPPFLAGS) $(GEOIP_CPPFLAGS)
 common_flags = -I$(srcdir)/libs -Ilibs -I$(srcdir)/include $(CRYPTOPP_CPPFLAGS)
 
@@ -304,7 +310,7 @@ amulecmd_SOURCES = \
 	NetworkFunctions.cpp 
 
 amulecmd_DEPENDENCIES = $(remote_common_deps)
-amulecmd_CPPFLAGS = $(AM_CPPFLAGS) $(WXBASE_CPPFLAGS) $(common_flags)
+amulecmd_CPPFLAGS = $(AM_CPPFLAGS) $(WXBASE_CPPFLAGS) $(common_flags) $(BOOST_CPPFLAGS)
 amulecmd_CXXFLAGS = $(AM_CXXFLAGS) $(WX_CFLAGS_ONLY) $(WX_CXXFLAGS_ONLY)
 #amulecmd_LDADD = $(WXBASE_LIBS) $(READLINE_LIBS) $(remote_common_libs)
 amulecmd_LDADD = -Llibs/common -Llibs/ec/cpp -lmulecommon -lec \
@@ -441,6 +447,9 @@ noinst_HEADERS = \
 		ThreadTasks.h \
 		ThrottledSocket.h \
 		Timer.h \
+		Torrent.h \
+		TorrentMuleMapping.h \
+		TorrentStrategy.h \
 		TransferWnd.h \
 		Types.h \
 		updownclient.h \

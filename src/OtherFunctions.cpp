@@ -1227,6 +1227,18 @@ return password.Encode();
 }
 
 
+#ifdef ENABLE_TORRENT
+#include <boost/filesystem.hpp>
+
+CPath BoostToCPath(const boost::filesystem::path& path) {
+	return CPath(path.native());
+}
+
+boost::filesystem::path CPathToBoost(const CPath& path) {
+	return (boost::filesystem::path(std::string(CPath::ToUniv(path))));
+}
+#endif
+
 const uint8 BitVector::s_posMask[] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80};
 const uint8 BitVector::s_negMask[] = {0xFE, 0xFD, 0xFB, 0xF7, 0xEF, 0xDF, 0xBF, 0x7F};
 

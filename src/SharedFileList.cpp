@@ -52,6 +52,9 @@
 #include "kademlia/kademlia/Kademlia.h"
 #include "kademlia/kademlia/Search.h"
 #include "ClientList.h"
+#ifdef ENABLE_TORRENT
+#include "Torrent.h"
+#endif
 
 typedef std::deque<CKnownFile*> KnownFileArray;
 
@@ -451,6 +454,12 @@ unsigned CSharedFileList::AddFilesFromDirectory(const CPath& directory)
 						% fname);
 
 				toadd->SetFilePath(directory);
+#ifdef ENABLE_TORRENT
+				if ( toadd->IsCompleted() && !torrent::CTorrent::GetInstance().HasBTMetadata(toadd->GetFileHash()))
+				{
+					torrent::CTorrent::GetInstance().CreateMetadataForFile(toadd->GetFileHash(), toadd->GetFileName(), toadd->GetFilePath());
+				}
+#endif
 			} else {
 				AddDebugLogLineN(logKnownFiles,
 					CFormat(wxT("File already shared, skipping: %s"))

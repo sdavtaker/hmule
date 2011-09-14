@@ -36,6 +36,10 @@
 	#include <unistd.h> // Do_not_auto_remove
 #endif
 
+#ifdef ENABLE_TORRENT
+#include "Torrent.h"
+#endif
+
 
 //-------------------------------------------------------------------
 
@@ -70,9 +74,15 @@ enum {
 	CMD_ID_CONNECT,
 	CMD_ID_CONNECT_ED2K,
 	CMD_ID_CONNECT_KAD,
+#ifdef ENABLE_TORRENT
+	CMD_ID_CONNECT_MAINLINE,
+#endif
 	CMD_ID_DISCONNECT,
 	CMD_ID_DISCONNECT_ED2K,
 	CMD_ID_DISCONNECT_KAD,
+#ifdef ENABLE_TORRENT
+	CMD_ID_DISCONNECT_MAINLINE,
+#endif
 	CMD_ID_RELOAD_SHARED,
 	CMD_ID_RELOAD_IPFILTER_LOCAL,
 	CMD_ID_RELOAD_IPFILTER_NET,
@@ -232,6 +242,11 @@ int CamulecmdApp::ProcessCommand(int CmdId)
 			request_list.push_back(new CECPacket(EC_OP_KAD_START));
 			break;
 
+#ifdef ENABLE_TORRENT
+			case CMD_ID_CONNECT_MAINLINE:
+ 			request_list.push_back(new CECPacket(EC_OP_MAINLINE_START));
+			break;
+#endif
  		case CMD_ID_DISCONNECT:
 			request_list.push_back(new CECPacket(EC_OP_DISCONNECT));
 			break;
@@ -244,6 +259,11 @@ int CamulecmdApp::ProcessCommand(int CmdId)
 			request_list.push_back(new CECPacket(EC_OP_KAD_STOP));
 			break;
 
+#ifdef ENABLE_TORRENT
+ 		case CMD_ID_DISCONNECT_MAINLINE:
+  			request_list.push_back(new CECPacket(EC_OP_MAINLINE_STOP));
+ 			break;
+#endif
 		case CMD_ID_RELOAD_SHARED:
 			request_list.push_back(new CECPacket(EC_OP_SHAREDFILES_RELOAD));
 			break;
@@ -728,6 +748,15 @@ void CamulecmdApp::Process_Answer_v2(const CECPacket *response)
 					s << _("Not running");
 				}
 				s << wxT('\n');
+#ifdef ENABLE_TORRENT
+//TODO: Add to external connection the stats for mainline
+//				s << _("Mainline")  << wxT(": ");
+//				if (connState.IsMainlineConnected()){
+//					s << _("Connected");
+//				} else {
+//					s << _("Not connected");
+//				}
+#endif
 			}
 			const CECTag *tmpTag;
 			if ((tmpTag = response->GetTagByName(EC_TAG_STATS_DL_SPEED)) != 0) {
@@ -868,15 +897,23 @@ void CamulecmdApp::OnInitCommandSet()
 				    wxTRANSLATE("This will connect to all networks that are enabled in Preferences.\nYou may also optionally specify a server address in IP:Port form, to connect to\nthat server only. The IP must be a dotted decimal IPv4 address,\nor a resolvable DNS name."), CMD_PARAM_OPTIONAL);
 	tmp->AddCommand(wxT("ED2K"), CMD_ID_CONNECT_ED2K, wxTRANSLATE("Connect to eD2k only."), wxEmptyString, CMD_PARAM_NEVER);
 	tmp->AddCommand(wxT("Kad"), CMD_ID_CONNECT_KAD, wxTRANSLATE("Connect to Kad only."), wxEmptyString, CMD_PARAM_NEVER);
-
+#ifdef ENABLE_TORRENT
+	tmp->AddCommand(wxT("Mainline"), CMD_ID_CONNECT_MAINLINE, wxTRANSLATE("Connect to mainline DHT to find more peers in torrent network."), wxEmptyString, CMD_PARAM_NEVER);
+#endif
 	tmp = m_commands.AddCommand(wxT("Disconnect"), CMD_ID_DISCONNECT, wxTRANSLATE("Disconnect from the network."),
 				    wxTRANSLATE("This will disconnect from all networks that are currently connected.\n"), CMD_PARAM_NEVER);
 	tmp->AddCommand(wxT("ED2K"), CMD_ID_DISCONNECT_ED2K, wxTRANSLATE("Disconnect from eD2k only."), wxEmptyString, CMD_PARAM_NEVER);
 	tmp->AddCommand(wxT("Kad"), CMD_ID_DISCONNECT_KAD, wxTRANSLATE("Disconnect from Kad only."), wxEmptyString, CMD_PARAM_NEVER);
+#ifdef ENABLE_TORRENT
+	tmp->AddCommand(wxT("Mainline"), CMD_ID_DISCONNECT_MAINLINE, wxTRANSLATE("Disconnect from mainline only."), wxEmptyString, CMD_PARAM_NEVER);
+#endif
 
  	m_commands.AddCommand(wxT("Add"), CMD_ID_ADDLINK, wxTRANSLATE("Add an eD2k or magnet link to core."),
-			      wxTRANSLATE("The eD2k link to be added can be:\n*) a file link (ed2k://|file|...), it will be added to the download queue,\n*) a server link (ed2k://|server|...), it will be added to the server list,\n*) or a serverlist link, in which case all servers in the list will be added to the\n   server list.\n\nThe magnet link must contain the eD2k hash and file length.\n"), CMD_PARAM_ALWAYS);
-
+#ifdef ENABLE_TORRENT
+ 			wxTRANSLATE("The eD2k link to be added can be:\n*) a file link (ed2k://|file|...), it will be added to the download queue,\n*) a .torrent filename, after succesfully downloaded from BT network it will be published in the KAD network\n*) a mainline DHT magnet link, when mainline is active will download the BT metadata from mainline, then download the file and publish it in KAD \n*) a server link (ed2k://|server|...), it will be added to the server list,\n*) or a serverlist link, in which case all servers in the list will be added to the\n   server list.\n\nThe magnet link must contain the eD2k hash and file length.\n"), CMD_PARAM_ALWAYS);
+#else
+ 			wxTRANSLATE("The eD2k link to be added can be:\n*) a file link (ed2k://|file|...), it will be added to the download queue,\n*) a server link (ed2k://|server|...), it will be added to the server list,\n*) or a serverlist link, in which case all servers in the list will be added to the\n   server list.\n\nThe magnet link must contain the eD2k hash and file length.\n"), CMD_PARAM_ALWAYS);
+#endif
 	tmp = m_commands.AddCommand(wxT("Set"), CMD_ERR_INCOMPLETE, wxTRANSLATE("Set a preference value."),
 				    wxEmptyString, CMD_PARAM_NEVER);
 

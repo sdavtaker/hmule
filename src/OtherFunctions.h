@@ -36,7 +36,6 @@
 
 class CPath;
 
-
 /**
  * Helper function.
  *
@@ -435,6 +434,20 @@ private:
     wxMutex& m_mutex;
 };
 #endif /* wxUSE_THREADS */
+
+
+#ifdef ENABLE_TORRENT
+#include <boost/filesystem.hpp>
+/**
+ * Converts a CPath object to the boost::filesystem::path
+ */
+CPath BoostToCPath(const boost::filesystem::path& path) ;
+/**
+ * Converts a boost::filesystem::path to CPath
+ */
+boost::filesystem::path CPathToBoost(const CPath& path) ;
+#endif
+
 
 
 #endif // OTHERFUNCTIONS_H

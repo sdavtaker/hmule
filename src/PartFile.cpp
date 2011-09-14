@@ -3768,6 +3768,9 @@ wxString CPartFile::GetFeedback() const
 	return retval + _("Status") + wxT(": ") + getPartfileStatus() + wxT("\n");
 }
 
+uint64  CPartFile::GetCompletedSize() const{
+	return completedsize;
+}
 
 sint32 CPartFile::getTimeRemaining() const
 {

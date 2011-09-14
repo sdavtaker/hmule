@@ -98,7 +98,8 @@ enum ED2KExtendedClientTCP {
 	OP_REQUESTPARTS_I64			= 0xA3,	// <HASH 16><start[3] 8*3><end[3] 8*3>
 	OP_MULTIPACKET_EXT			= 0xA4,	
 	OP_CHATCAPTCHAREQ			= 0xA5,
-	OP_CHATCAPTCHARES			= 0xA6,
+	OP_CHATCAPTCHARES			= 0xA6,//<HASH 16>
+	OP_BTIH			= 0xB1,//<HASH 32><UInt16>
 };
 
 #endif // ED2KC2CTCP_H

@@ -104,6 +104,10 @@ bool		CPreferences::s_autoserverlist;
 bool		CPreferences::s_deadserver;
 CPath		CPreferences::s_incomingdir;
 CPath		CPreferences::s_tempdir;
+#ifdef ENABLE_TORRENT
+CPath		CPreferences::s_torrentdir;
+int			CPreferences::s_torrentstrategy;
+#endif
 bool		CPreferences::s_ICH;
 uint8		CPreferences::s_depth3D;
 bool		CPreferences::s_scorsystem;
@@ -1058,6 +1062,10 @@ void CPreferences::BuildItemList( const wxString& appdir )
 	 * Files
 	 **/
 	NewCfgItem(IDC_TEMPFILES,	(new Cfg_Path(  wxT("/eMule/TempDir"), 	s_tempdir, appdir + wxT("Temp") )));
+#ifdef ENABLE_TORRENT
+	NewCfgItem(IDC_TORRENTFILES,	(new Cfg_Path(  wxT("/Torrent/TorrentDir"), 	s_torrentdir, appdir + wxT("torrent") )));
+	NewCfgItem(IDC_TORRENTSTRATEGY, (MkCfg_Int(  wxT("/Torrent/Strategy"), 		s_torrentstrategy, 0)));
+#endif
 
 	#if defined(__WXMAC__) || defined(__WXMSW__)
 		wxString incpath = wxStandardPaths::Get().GetDocumentsDir();
